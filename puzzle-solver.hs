@@ -17,4 +17,17 @@ solvePuzzle :: Puzzle -> Solution
 solvePuzzle (Puzzle cols rows) = Solution [[]]	-- TODO
 
 printSolution :: Solution -> IO ()
-printSolution s = do return () 	-- TODO
+printSolution (Solution rs) = do printBoard rs
+
+printBoard [] = do putChar '\n'
+printBoard (r:rs) = do printRow r
+                       printBoard rs
+
+printRow :: [Cell] -> IO ()
+printRow [] = do putChar '\n'
+printRow (c:cs) = do printCell c
+                     printRow cs
+
+printCell :: Cell -> IO ()
+printCell Filled = do putChar 'X'
+printCell Blank = do putChar ' '
