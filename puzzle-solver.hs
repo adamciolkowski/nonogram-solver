@@ -1,13 +1,14 @@
 import System.IO
+import System.Environment
 
-readPuzzle path = do handle <- openFile path ReadMode
-                     cols <- hGetLine handle
-                     rows <- hGetLine handle
-                     hClose handle
-                     printSolution (solvePuzzle (Puzzle (parse cols) (parse rows)))
-                     return ()
-					 where
-                       parse s = (read s)::[[Int]]
+main = do args <- getArgs
+          handle <- openFile (head args) ReadMode
+          cols <- hGetLine handle
+          rows <- hGetLine handle
+          hClose handle
+          printSolution (solvePuzzle (Puzzle (parse cols) (parse rows)))
+          where
+            parse s = (read s)::[[Int]]
 
 data Puzzle = Puzzle [[Int]] [[Int]] deriving Show
 data Cell = Filled | Blank deriving Show
