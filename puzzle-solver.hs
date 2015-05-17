@@ -24,7 +24,7 @@ solvePuzzle :: Puzzle -> Solution
 solvePuzzle p = fromJust (find (\s -> isValidSolution s p) (allPossibleSolutions p))
 
 allPossibleSolutions :: Puzzle -> [Solution]
-allPossibleSolutions p = map (\rs -> Solution rs) (possibleSolutions (colCount p) (rowCount p))
+allPossibleSolutions p = map (Solution) (possibleSolutions (colCount p) (rowCount p))
 
 possibleSolutions :: Int -> Int -> [[[Cell]]]
 possibleSolutions 0 len = [[]]
