@@ -24,15 +24,22 @@ solvePuzzle :: Puzzle -> Solution
 solvePuzzle p = fromJust (find (\s -> isValidSolution s p) (allPossibleSolutions p))
 
 allPossibleSolutions :: Puzzle -> [Solution]
-allPossibleSolutions p = map (Solution) (possibleSolutions (colCount p) (rowCount p))
+allPossibleSolutions (Puzzle rs cs) = map (Solution) (possibleSolutions rs (length rs) (length cs))
 
-possibleSolutions :: Int -> Int -> [[[Cell]]]
-possibleSolutions 0 len = [[]]
-possibleSolutions x len = [rs : rss | rs <- possibleRows len, rss <- possibleSolutions (x - 1) len]
+possibleSolutions :: [[Int]] -> Int -> Int -> [[[Cell]]]
+possibleSolutions _ 0 len = [[]]
+possibleSolutions (h:hs) x len = [rs : rss | rs <- possibleRowsForHint h len, rss <- possibleSolutions hs (x - 1) len]
 
 possibleRows :: Int -> [[Cell]]
 possibleRows 0 = [[]]
 possibleRows len = [c : rs | c <- [Filled, Blank], rs <- possibleRows (len - 1)]
+
+possibleRowsForHint :: [Int] -> Int -> [[Cell]]
+possibleRowsForHint hs len = permuteWithoutDuplicates ((replicate noFilled Filled) ++ (replicate (len - noFilled) Blank))
+                             where
+                               noFilled = sum hs
+
+permuteWithoutDuplicates xs = nub (permutations xs)
 
 isValidSolution :: Solution -> Puzzle -> Bool
 isValidSolution (Solution rs) (Puzzle rows cols) = (areRowsValid rows rs) && (areRowsValid cols (transpose rs))
