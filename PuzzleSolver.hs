@@ -1,24 +1,9 @@
+module PuzzleSolver where
+import System.IO
 import Data.List
 import Data.Maybe
-import System.Environment
-import System.IO
 
-main = do args <- getArgs
-          handle <- openFile (head args) ReadMode
-          cols <- hGetLine handle
-          rows <- hGetLine handle
-          hClose handle
-          printSolution (solvePuzzle (Puzzle (parse cols) (parse rows)))
-          where
-            parse s = (read s)::[[Int]]
-
-data Puzzle = Puzzle [[Int]] [[Int]] deriving Show
-
-colCount (Puzzle c _) = length c
-rowCount (Puzzle _ r) = length r
-
-data Cell = Filled | Blank deriving (Eq, Show)
-data Solution = Solution [[Cell]] deriving Show
+import Puzzle
 
 solvePuzzle :: Puzzle -> Solution
 solvePuzzle p = fromJust (find (\s -> isValidSolution s p) (allPossibleSolutions p))
@@ -62,19 +47,3 @@ hintsFor cs = getHints 0 cs
                                         if i == 0 then getHints 0 cs
                                         else i : getHints 0 cs
                                     else getHints (i + 1) cs
-
-printSolution :: Solution -> IO ()
-printSolution (Solution rs) = do printBoard rs
-
-printBoard [] = do putChar '\n'
-printBoard (r:rs) = do printRow r
-                       printBoard rs
-
-printRow :: [Cell] -> IO ()
-printRow [] = do putChar '\n'
-printRow (c:cs) = do printCell c
-                     printRow cs
-
-printCell :: Cell -> IO ()
-printCell Filled = do putChar 'X'
-printCell Blank = do putChar ' '
