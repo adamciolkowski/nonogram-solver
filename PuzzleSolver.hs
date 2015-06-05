@@ -6,28 +6,27 @@ import Data.Maybe
 import Puzzle
 
 solvePuzzle :: Puzzle -> Solution
-solvePuzzle p = fromJust (find (\s -> isValidSolution s p) (allPossibleSolutions p))
+solvePuzzle p = fromJust (find (\s -> isValidSolution s p) (possibleSolutions p))
 
-allPossibleSolutions :: Puzzle -> [Solution]
-allPossibleSolutions (Puzzle rs cs) = map (Solution) (possibleSolutions rs (length rs) (length cs))
+possibleSolutions :: Puzzle -> [Solution]
+possibleSolutions (Puzzle rs cs) = map (Solution) (validRowsSolutions rs (length rs) (length cs))
 
-possibleSolutions :: [[Int]] -> Int -> Int -> [[[Cell]]]
-possibleSolutions _ 0 len = [[]]
-possibleSolutions (h:hs) x len = [rs : rss | rs <- possibleRowsForHint h len, rss <- possibleSolutions hs (x - 1) len]
+validRowsSolutions :: [[Int]] -> Int -> Int -> [[[Cell]]]
+validRowsSolutions _ 0 len = [[]]
+validRowsSolutions (h:hs) x len = [rs : rss | rs <- rowsForHint h len, rss <- validRowsSolutions hs (x - 1) len]
 
-possibleRows :: Int -> [[Cell]]
-possibleRows 0 = [[]]
-possibleRows len = [c : rs | c <- [Filled, Blank], rs <- possibleRows (len - 1)]
-
-possibleRowsForHint :: [Int] -> Int -> [[Cell]]
-possibleRowsForHint hs len = permuteWithoutDuplicates ((replicate noFilled Filled) ++ (replicate (len - noFilled) Blank))
-                             where
-                               noFilled = sum hs
-
-permuteWithoutDuplicates xs = nub (permutations xs)
+rowsForHint :: [Int] -> Int -> [[Cell]]
+rowsForHint [0] len = [replicate len Blank]
+rowsForHint [h] len | len == h = [replicate len Filled]
+                    | len > h = [(replicate h Filled) ++ (replicate (len - h) Blank)] ++
+                                [Blank : rs | rs <- rowsForHint [h] (len - 1)]
+                    | otherwise = []
+rowsForHint (h:hs) len = if len < 0 then []
+                         else [(replicate h Filled) ++ [Blank] ++ rs | rs <- rowsForHint hs (len - h - 1)] ++
+                              [Blank : rs | rs <- rowsForHint (h:hs) (len - 1)]
 
 isValidSolution :: Solution -> Puzzle -> Bool
-isValidSolution (Solution rs) (Puzzle rows cols) = (areRowsValid rows rs) && (areRowsValid cols (transpose rs))
+isValidSolution (Solution rs) (Puzzle rows cols) = areRowsValid cols (transpose rs)
 
 areRowsValid :: [[Int]] -> [[Cell]] -> Bool
 areRowsValid [] [] = True
